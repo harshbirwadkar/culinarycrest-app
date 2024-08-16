@@ -1,0 +1,534 @@
+Object
+
+{
+    "recipe_heading": "Rigatoni Caprese",
+    "recipe_subheading": "with Pine Nuts, Mozzarella and Slow Roasted Tomatoes",
+    "duration": "30",
+    "recipe_image": {
+        "0": {}
+    },
+    "ingredients": [
+        {
+            "img": {},
+            "name": "Tomato Passata",
+            "quantity": "1 pack(s)"
+        },
+        {
+            "img": {},
+            "name": "Sugar for the Sauce",
+            "quantity": "1 tsp"
+        }
+    ],
+    "utensils": [
+        {
+            "name": "Saucepan"
+        },
+        {
+            "name": "Aluminum Foil"
+        }
+    ],
+    "allinstructions": [
+        {
+            "instruction": "Preheat your oven to 200°C. Bring a large saucepan of water to the boil with 1/2 tsp salt for the pasta. Halve the tomatoes and pop them onto a piece of foil with a drizzle of oil and the cider vinegar, then season with salt and pepper. Fold the foil, sealing on all sides to create a parcel. When the oven is hot, pop onto a baking tray, then roast on the top shelf until softened, 15-20 mins."
+        },
+        {
+            "instruction": "Meanwhile, halve, peel and chop the red onion into small pieces. Peel and grate the garlic (or use a garlic press). Roughly chop the olives. Heat a large frying pan on medium heat (no oil). Once hot, add the pine nuts and dry-fry, stirring regularly, until lightly toasted, 2-3 mins. TIP: Watch them like a hawk as they can burn easily. Transfer to a small bowl."
+        }
+    ],
+    "nutrients": {
+        "energy_kJ": "02834",
+        "energy_kcal": "0677",
+        "fat": "0",
+        "saturates": "0",
+        "carbohydrate": "0",
+        "sugars": "0",
+        "protein": "0",
+        "salt": "0",
+        "multiplier": "1"
+    }
+}
+
+
+
+
+[
+    {
+        "img": {
+            "0": {}
+        },
+        "name": "Black Olives",
+        "quantity": "30 grams"
+    },
+    {
+        "img": {
+            "0": {}
+        },
+        "name": "Tomato Passata  ",
+        "quantity": "1 pack(s)"
+    }
+]
+
+{
+  "allutensils" : [
+    {
+    "name" : "Saucepan"
+    },
+    {
+    "name" : "Aluminum Foil"
+    },
+    {
+    "name" : "Baking Tray"
+    },
+    {
+    "name" : "Garlic Press"
+    },
+    {
+    "name" : "Frying Pan"
+    },
+    {
+    "name" : "Colander"
+    }
+  ]
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+const express = require('express')
+const router = express.Router()
+const Recipe = require('../models/RecipeDetails')
+const Ingredient = require('../models/Ingredients')
+const Utensil = require('../models/Utensils')
+const RecipeInstruction = require('../models/RecipeInstruction')
+const RecipeNutritionalInfo = require('../models/NutriInfo')
+const { body, validationResult } = require('express-validator');
+
+
+const cloudinary = require('cloudinary').v2;
+const multer = require('multer');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+
+
+cloudinary.config({
+    cloud_name: process.env.CULINARYCREST_APP_CLOUDINARY_CLOUDNAME,
+    api_key: process.env.CULINARYCREST_APP_CLOUDINARY_APIKEY,
+    api_secret: process.env.CULINARYCREST_APP_CLOUDINARY_APISECRET
+  });
+// cloudinary.config({
+//     cloud_name: 'YOUR_CLOUDINARY_CLOUD_NAME',
+//     api_key: 'YOUR_CLOUDINARY_API_KEY',
+//     api_secret: 'YOUR_CLOUDINARY_API_SECRET'
+//   });
+  
+  // Configure multer storage engine for Cloudinary
+  const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+      folder: 'recipes', // Folder name in Cloudinary where images will be stored
+      format: async (req, file) => {
+        // Determine the format based on the uploaded file's mimetype
+        if (file.mimetype === 'image/jpeg') {
+          return 'jpg';
+        } else if (file.mimetype === 'image/png') {
+          return 'png';
+        } else if (file.mimetype === 'image/gif') {
+          return 'gif';
+        } else {
+          // Default format if not recognized
+          return 'jpg';
+        }
+      }, // Supports promises as well
+      public_id: (req, file) => 'computed-filename-using-request', // Adjust as per your naming convention
+    },
+  });
+  const parser = multer({ storage: storage });
+
+// post routes 
+
+// ROUTE1 : save recipe initial details  using POST: http://localhost:5000/api/recipe/addrecipes 
+// router.post('/addrecipes', [
+//     body('heading', 'Enter recipe name with more than or equal to two characters').isLength({ min: 2 }),
+//     body('duration', 'Enter a vaild duration').isLength({ min: 1 })
+// ], async (req, res) => {
+//     // destructing the req.body 
+//     const { heading, subheading, duration , recipeimg} = req.body
+//     // checking for validation errors if exists then sending bad request and error 
+//     const errors = validationResult(req);
+//     try {
+//         if (!errors.isEmpty()) {
+//             return res.status(400).json({ errors: errors.array() });
+//         }
+//     } catch (err) {
+//         console.log(err.message)
+//         res.status(500).json({ err: err.message })
+//     }
+//     try {
+//         // saving the data in the database with user id as well
+//         let recipe = new Recipe({
+//             heading, subheading, duration , recipeimg
+//         })
+//         let savedRecipe = await recipe.save()
+//         res.json(savedRecipe)
+//     } catch (err) {
+//         console.log(err.message)
+//         res.status(500).json({ err: err.message })
+//     }
+
+// })
+
+
+// ROUTE1 : save recipe initial details  using POST: http://localhost:5000/api/recipe/addrecipes 
+router.post('/addrecipes', parser.single('recipeimg'), [
+  body('heading', 'Enter recipe name with more than or equal to two characters').isLength({ min: 2 }),
+  body('duration', 'Enter a valid duration').isLength({ min: 1 })
+], async (req, res) => {
+  const { heading, subheading, duration } = req.body;
+  const recipeimg = req.file ? req.file.path : '';
+
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  try {
+    const recipe = new Recipe({ heading, subheading, duration, recipeimg });
+    const savedRecipe = await recipe.save();
+    res.json(savedRecipe);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ err: err.message });
+  }
+});
+
+
+
+
+
+// // ROUTE2 : save recipes ingredients using POST: http://localhost:5000/api/recipe/addingredients/:id
+// router.post('/addingredients/:id', [
+//     body('allingredients.*.name', 'Enter ingredients name with more than or equal to two characters').isLength({ min: 2 }),
+//     body('allingredients.*.quantity', 'Enter a vaild duration').isLength({ min: 1 })
+// ], async (req, res) => {
+//     // destructing the req.body 
+//     const { allingredients } = req.body
+//     let recipe_id =  req.params.id
+//     // checking for validation errors if exists then sending bad request and error 
+//     const errors = validationResult(req);
+//     try {
+//         if (!errors.isEmpty()) {
+//             return res.status(400).json({ errors: errors.array() });
+//         }
+//     } catch (err) {
+//         console.log(err.message)
+//         res.status(500).json({ err: err.message })
+//     }
+//     try {
+//         // saving the data in the database with user id as well
+//         let ingredient = new Ingredient({
+//             recipe_id, allingredients
+//         })
+//         let savedIngredient = await ingredient.save()
+//         res.json(savedIngredient)
+//     } catch (err) {
+//         console.log(err.message)
+//         res.status(500).json({ err: err.message })
+//     }
+
+// })
+
+
+
+// ROUTE2 : save recipes ingredients using POST: http://localhost:5000/api/recipe/addingredients/:id
+router.post('/addingredients/:id', parser.array('allingredients[].img'), [
+  body('allingredients.*.name', 'Enter ingredients name with more than or equal to two characters').isLength({ min: 2 }),
+  body('allingredients.*.quantity', 'Enter a valid quantity').isLength({ min: 1 })
+], async (req, res) => {
+  const { allingredients } = req.body;
+  console.log(allingredients.img);
+  const recipe_id = req.params.id;
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  if (!allingredients) {
+    return res.status(400).json({ errors: [{ msg: 'All ingredients are required' }] });
+  }
+
+  try {
+    const ingredientsWithImages = await Promise.all(allingredients.map(async (ingredient, index) => {
+      if (req.files && req.files[index]) {
+        const uploaded = await cloudinary.uploader.upload(req.files[index].path);
+        ingredient.img = uploaded.secure_url;
+      }
+      return ingredient;
+    }));
+
+    const ingredient = new Ingredient({ recipe_id, allingredients: ingredientsWithImages });
+    const savedIngredient = await ingredient.save();
+    res.json(savedIngredient);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ err: err.message });
+  }
+});
+
+
+
+
+
+
+
+// ROUTE3 : save recipes utensils using POST: http://localhost:5000/api/recipe/addutensils/:id
+router.post('/addutensils/:id', [
+    body('allutensils.*.name', 'Enter utensils name with more than or equal to two characters').isLength({ min: 2 }),
+], async (req, res) => {
+    // destructing the req.body 
+    const { allutensils } = req.body
+    let recipe_id =  req.params.id
+    // checking for validation errors if exists then sending bad request and error 
+    const errors = validationResult(req);
+    try {
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+    } catch (err) {
+        console.log(err.message)
+        res.status(500).json({ err: err.message })
+    }
+    try {
+        // saving the data in the database with user id as well
+        let utensil = new Utensil({
+            recipe_id, allutensils 
+        })
+        let savedUtensil = await utensil.save()
+        res.json(savedUtensil)
+    } catch (err) {
+        console.log(err.message)
+        res.status(500).json({ err: err.message })
+    }
+
+})
+
+
+// // ROUTE4 : save recipes instructions using POST: http://localhost:5000/api/recipe/addrecipeinstructions/:id
+// router.post('/addrecipeinstructions/:id', [
+//     body('allinstructions.*.instruction', 'Enter instruction with more than or equal to two characters').isLength({ min: 2 }),
+// ], async (req, res) => {
+//     // destructing the req.body 
+//     const { allinstructions } = req.body
+//     let recipe_id =  req.params.id
+//     // checking for validation errors if exists then sending bad request and error 
+//     const errors = validationResult(req);
+//     try {
+//         if (!errors.isEmpty()) {
+//             return res.status(400).json({ errors: errors.array() });
+//         }
+//     } catch (err) {
+//         console.log(err.message)
+//         res.status(500).json({ err: err.message })
+//     }
+//     try {
+//         // saving the data in the database with user id as well
+//         let recipe_instruction = new RecipeInstruction({
+//             recipe_id, allinstructions 
+//         })
+//         let savedRecipe_instruction = await recipe_instruction.save()
+//         res.json(savedRecipe_instruction)
+//     } catch (err) {
+//         console.log(err.message)
+//         res.status(500).json({ err: err.message })
+//     }
+
+// })
+
+
+// ROUTE4 : save recipes instructions using POST: http://localhost:5000/api/recipe/addrecipeinstructions/:id
+router.post('/addrecipeinstructions/:id', parser.array('allinstructions[].images'), [
+  body('allinstructions.*.instruction', 'Enter instruction with more than or equal to two characters').isLength({ min: 2 }),
+], async (req, res) => {
+  const { allinstructions } = req.body;
+  const recipe_id = req.params.id;
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
+  if (!allinstructions) {
+    return res.status(400).json({ errors: [{ msg: 'All instructions are required' }] });
+  }
+
+  try {
+    const instructionsWithImages = await Promise.all(allinstructions.map(async (instruction, index) => {
+      if (req.files && req.files[index]) {
+        const uploadedImages = await Promise.all(req.files.map(async (file) => {
+          const uploaded = await cloudinary.uploader.upload(file.path);
+          return uploaded.secure_url;
+        }));
+        instruction.images = uploadedImages;
+      }
+      return instruction;
+    }));
+
+    const recipe_instruction = new RecipeInstruction({ recipe_id, allinstructions: instructionsWithImages });
+    const savedRecipe_instruction = await recipe_instruction.save();
+    res.json(savedRecipe_instruction);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ err: err.message });
+  }
+});
+
+
+
+
+
+
+
+// ROUTE 5 : save recipes nutritional information using POST: http://localhost:5000/api/recipe/addnutritionalinfo/:id
+router.post('/addnutritionalinfo/:id', [
+    body('allnutritions.*.energy_kJ', 'Enter a valid energy_kJ').notEmpty().isNumeric(),
+    body('allnutritions.*.energy_kcal', 'Enter a valid energy_kcal').notEmpty().isNumeric(),
+    body('allnutritions.*.fat', 'Enter a valid fat').notEmpty().isNumeric(),
+    body('allnutritions.*.of_which_saturates', 'Enter a valid of_which_saturates').notEmpty().isNumeric(),
+    body('allnutritions.*.carbohydrate', 'Enter a valid carbohydrate').notEmpty().isNumeric(),
+    body('allnutritions.*.of_which_sugars', 'Enter a valid of_which_sugars').notEmpty().isNumeric(),
+    body('allnutritions.*.protein', 'Enter a valid protein').notEmpty().isNumeric(),
+    body('allnutritions.*.salt', 'Enter a valid salt').notEmpty().isNumeric(),
+    body('allnutritions.*.multiplier', 'Enter a valid multiplier').notEmpty().isNumeric()
+], async (req, res) => {
+    // destructing the req.body 
+    const { allnutritions } = req.body
+    let recipe_id =  req.params.id
+    // checking for validation errors if exists then sending bad request and error 
+    const errors = validationResult(req);
+    try {
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+    } catch (err) {
+        console.log(err.message)
+        res.status(500).json({ err: err.message })
+    }
+    try {
+        // saving the data in the database with user id as well
+        let nutri_info = new RecipeNutritionalInfo({
+            recipe_id, allnutritions 
+        })
+        let saved_Nutri_info = await nutri_info.save()
+        res.json(saved_Nutri_info)
+    } catch (err) {
+        console.log(err.message)
+        res.status(500).json({ err: err.message })
+    }
+
+})
+
+// get routes
+
+// ROUTE6 : gets all the recipes using GET: http://localhost:5000/api/recipe/getallrecipes 
+// router.get('/getallrecipes', async (req, res) => {
+//     try {
+//         // Find all recipes
+//         const recipes = await Recipe.find();
+//         res.json(recipes);
+//     } catch (error) {
+//         console.error(error.message);
+//         res.status(500).send('Server Error');
+//     }
+// })
+
+// router.get('/getallrecipes/:page/:limit', async (req, res) => {
+//     try {
+//         const page = parseInt(req.params.page) || 1; // Get the page number from URL parameter, default to 1
+//         const limit = parseInt(req.params.limit) || 6; // Get the limit per page from URL parameter, default to 10
+
+//         // Calculate the number of documents to skip
+//         const skip = (page - 1) * limit;
+
+//         // Find all recipes with pagination
+//         const recipes = await Recipe.find()
+//             .skip(skip)
+//             .limit(limit);
+
+//         res.json(recipes);
+//     } catch (error) {
+//         console.error(error.message);
+//         res.status(500).send('Server Error');
+//     }
+// })
+
+
+
+
+// ROUTE6 : gets all the recipes using GET: http://localhost:5000/api/recipe/getallrecipes 
+router.get('/getallrecipes', async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1; // Get the page number from query parameter, default to 1
+        const limit = parseInt(req.query.limit) || 6; // Get the limit per page from query parameter, default to 6
+        
+        // Calculate the number of documents to skip
+        const skip = (page - 1) * limit;
+
+        // Find all recipes with pagination
+        const recipes = await Recipe.find()
+            .skip(skip)
+            .limit(limit);
+
+        res.json(recipes);
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+
+
+// ROUTE7: Get all the details about the specific recipe using the ID of the recipe using GET: http://localhost:5000/api/recipe/getrecipe/:id
+router.get('/getrecipe/:id', async (req, res) => {
+    try {
+        const recipeId = req.params.id;
+
+        // Execute all queries simultaneously
+        const [recipe_detail , recipes_ingredient, recipes_utensil, recipes_instruction, recipes_nutritionalInfo] = await Promise.all([
+            Recipe.findById(recipeId) ,
+            Ingredient.find({ recipe_id: recipeId }),
+            Utensil.find({ recipe_id: recipeId }),
+            RecipeInstruction.find({ recipe_id: recipeId }),
+            RecipeNutritionalInfo.find({ recipe_id: recipeId })
+        ]);
+
+        res.json({ recipe_detail , recipes_ingredient, recipes_utensil, recipes_instruction, recipes_nutritionalInfo });
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+
+
+
+module.exports = router
