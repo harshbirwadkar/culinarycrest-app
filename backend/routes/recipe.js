@@ -14,8 +14,8 @@ const { upload } = require('../middlewares/multer.middleware');
 const { UploadCloudinary } = require('../utils/cloudinary.util');
 
 const cloudinary = require('cloudinary').v2;
-const multer = require('multer');
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
+// const multer = require('multer');
+// const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
 
 cloudinary.config({
@@ -25,27 +25,27 @@ cloudinary.config({
   });
   
   // Configure multer storage engine for Cloudinary
-  const storage = new CloudinaryStorage({
-    cloudinary: cloudinary,
-    params: {
-      folder: 'recipes', // Folder name in Cloudinary where images will be stored
-      format: async (req, file) => {
-        // Determine the format based on the uploaded file's mimetype
-        if (file.mimetype === 'image/jpeg') {
-          return 'jpg';
-        } else if (file.mimetype === 'image/png') {
-          return 'png';
-        } else if (file.mimetype === 'image/gif') {
-          return 'gif';
-        } else {
-          // Default format if not recognized
-          return 'jpg';
-        }
-      }, // Supports promises as well
-      public_id: (req, file) => 'computed-filename-using-request', // Adjust as per your naming convention
-    },
-  });
-  const parser = multer({ storage: storage });
+  // const storage = new CloudinaryStorage({
+  //   cloudinary: cloudinary,
+  //   params: {
+  //     folder: 'recipes', // Folder name in Cloudinary where images will be stored
+  //     format: async (req, file) => {
+  //       // Determine the format based on the uploaded file's mimetype
+  //       if (file.mimetype === 'image/jpeg') {
+  //         return 'jpg';
+  //       } else if (file.mimetype === 'image/png') {
+  //         return 'png';
+  //       } else if (file.mimetype === 'image/gif') {
+  //         return 'gif';
+  //       } else {
+  //         // Default format if not recognized
+  //         return 'jpg';
+  //       }
+  //     }, // Supports promises as well
+  //     public_id: (req, file) => 'computed-filename-using-request', // Adjust as per your naming convention
+  //   },
+  // });
+  // const parser = multer({ storage: storage });
 
 // post routes 
 

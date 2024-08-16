@@ -100,7 +100,6 @@ function ViewRecipePage() {
   useEffect(() => {
     if (id) {
       dispatch(fetchRecipeDetails(id))
-        .then(() => console.log('fetchRecipeDetails dispatch successful'))
         .catch((err) => console.log('fetchRecipeDetails dispatch error:', err));
     } else {
       console.log('ID is undefined');
