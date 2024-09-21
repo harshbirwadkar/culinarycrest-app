@@ -608,6 +608,17 @@ router.get('/getrecipe/:id', async (req, res) => {
     try {
         const recipeId = req.params.id;
 
+        const recipe_detail1 = await Recipe.findByIdAndUpdate(
+          recipeId, 
+          { $inc: { views: 1 } }, // Increment the views by 1
+          { new: true } // Return the updated document
+      );
+
+      // Check if the recipe exists
+      if (!recipe_detail1) {
+          return res.status(404).json({ msg: 'Recipe not found' });
+      }
+
         // Execute all queries simultaneously
         const [recipe_detail , recipes_ingredient, recipes_utensil, recipes_instruction, recipes_nutritionalInfo] = await Promise.all([
             Recipe.findById(recipeId) ,
@@ -624,6 +635,21 @@ router.get('/getrecipe/:id', async (req, res) => {
     }
 });
 
+// ROUTE8: Get all the recipes with the most views in descending order using GET: http://localhost:5000/api/recipe/toprecipes
+router.get('/toprecipes', async (req, res) => {
+  try {
+      // Find the top 4 recipes, sorted by views in descending order
+      const topRecipes = await Recipe.find()
+          .sort({ views: -1 })  // Sort by views in descending order
+          .limit(4);             // Limit the results to 4
+
+      // Return the top recipes
+      res.json(topRecipes);
+  } catch (error) {
+      console.error(error.message);
+      res.status(500).send('Server Error');
+  }
+});
 
 
 

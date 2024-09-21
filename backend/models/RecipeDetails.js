@@ -19,6 +19,10 @@ const RecipeDetailSchema = new Schema({
     date : {
         type : Date ,
         default : Date.now
+    },
+    views : {
+        type : Number ,
+        default : 0
     }
 });
 
