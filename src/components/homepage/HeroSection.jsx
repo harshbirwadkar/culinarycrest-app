@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 
 function HeroPage() {
   return (
@@ -9,9 +10,9 @@ function HeroPage() {
             <div className="text-2xl font-font3 font-medium text-white-smoke absolute top-[440px] w-full flex justify-center">Discover the Irresistible Charm of</div>
             <div className="text-4xl font-font3 font-light text-white-smoke absolute top-[470px] w-full flex justify-center"> Satay Aubergine and Roasted Broccoli</div>
             <div className="  top-[610px] w-full absolute flex justify-center"> 
-                <div className="w-[220px] h-[60px] bg-white-rgba-0.5 backdrop-blur-sm flex items-center justify-center rounded-xl border-2 border-white/70 transition duration-200 ease-in hover:bg-white-rgba-0.8 ">
+                <Link to='/viewrecipe/687fddd978a7a28547f32239' className="w-[220px] h-[60px] bg-white-rgba-0.5 backdrop-blur-sm flex items-center justify-center rounded-xl border-2 border-white/70 transition duration-200 ease-in hover:bg-white-rgba-0.8 ">
                     <span className='  font-bold text-matterhorn font-font2 text-xl '>View Recipe</span>
-                </div>
+                </Link>
             </div>
       </div>
     </div>
