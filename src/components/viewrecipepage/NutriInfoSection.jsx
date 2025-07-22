@@ -59,7 +59,7 @@ function NutriInfoSection() {
 
 
                         <div className="flex flex-col justify-center items-center w-2/4 mx-[70px]">
-                            <div className="text-2xl font-font1 font-bold text-matterhorn mb-[30px]">Per Serving</div>
+                            <div className="text-2xl font-font1 font-bold text-matterhorn mb-[30px]">Per 100g</div>
                             <div className="flex flex-col w-full">
                                 {filteredNutritionalInfo.map(([key, value]) => (
                                     <div className="flex justify-between" key={key}>

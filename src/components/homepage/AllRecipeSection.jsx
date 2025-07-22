@@ -2,7 +2,7 @@ import React, { useEffect , useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux'
 // import { getallRecipes } from '../../reduxslices/recipes/allRecipesSlice'
 import { fetchAllRecipes , nextPage  } from '../../reduxslices/recipes/allRecipesSlice'
-import { fetchRecipeDetails } from '../../reduxslices/recipes/recipeDetailsSlice'
+// import { fetchRecipeDetails } from '../../reduxslices/recipes/recipeDetailsSlice'
 import RecipeCard from './RecipeCard'
 import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 // import {faSpinnerThird} from '@fortawesome/free-solid-svg-icons';
@@ -16,7 +16,7 @@ function AllRecipeSection() {
 
   // const { value: allrecipes, loading: recipes_loading, error: recipes_error } = useSelector((state) => state.allrecipes);
   const { value: allrecipes, loading: recipes_loading, error: recipes_error, page }  = useSelector((state) => state.allrecipes);
-  const { value: recipesdetails, loading: recipesdetails_loading, error: recipesdetails_error } = useSelector((state) => state.recipedetails);
+  // const { value: recipesdetails, loading: recipesdetails_loading, error: recipesdetails_error } = useSelector((state) => state.recipedetails);
  
   // const [allRecipes, setallRecipes] = useState(null)
   // setTimeout(() => {
@@ -26,7 +26,6 @@ function AllRecipeSection() {
 
   useEffect(() => {
     dispatch(fetchAllRecipes({ page, limit: 6 }));
-    dispatch(fetchRecipeDetails('662805b5028e75803f4eb1f3'));
     
   }, [dispatch , page ]);
   

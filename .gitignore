@@ -11,8 +11,10 @@ node_modules
 dist
 dist-ssr
 *.local
-
+/*.txt
+/backend/*.txt
 recipe images
+/backend/.env
 
 # Editor directories and files
 .vscode/*
